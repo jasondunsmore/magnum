@@ -37,6 +37,7 @@
 
     "certificate:create": "rule:admin_or_user",
     "certificate:get": "rule:admin_or_user",
+    "certificate:replace": "rule:admin_or_user",
 
     "magnum-service:get_all": "rule:admin_api"
 }
