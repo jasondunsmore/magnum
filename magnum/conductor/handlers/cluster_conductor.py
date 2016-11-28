@@ -83,7 +83,7 @@ class Handler(object):
         cluster.status = fields.ClusterStatus.CREATE_IN_PROGRESS
         cluster.create()
 
-        self._poll_and_check(osc, cluster, cluster_driver)
+        Handler.poll_and_check(osc, cluster, cluster_driver)
 
         return cluster
 
@@ -125,7 +125,7 @@ class Handler(object):
                                                   ct.coe)
         # Create cluster
         cluster_driver.update_stack(context, osc, cluster, manager, rollback)
-        self._poll_and_check(osc, cluster, cluster_driver)
+        Handler.poll_and_check(osc, cluster, cluster_driver)
 
         return cluster
 
@@ -168,11 +168,12 @@ class Handler(object):
         cluster.status = fields.ClusterStatus.DELETE_IN_PROGRESS
         cluster.save()
 
-        self._poll_and_check(osc, cluster, cluster_driver)
+        Handler.poll_and_check(osc, cluster, cluster_driver)
 
         return None
 
-    def _poll_and_check(self, osc, cluster, cluster_driver):
+    @staticmethod
+    def poll_and_check(osc, cluster, cluster_driver):
         poller = HeatPoller(osc, cluster, cluster_driver)
         lc = loopingcall.FixedIntervalLoopingCall(f=poller.poll_and_check)
         lc.start(CONF.cluster_heat.wait_interval, True)
