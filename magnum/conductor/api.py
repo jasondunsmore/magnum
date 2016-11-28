@@ -58,6 +58,9 @@ class API(rpc_service.API):
     def get_ca_certificate(self, cluster):
         return self._call('get_ca_certificate', cluster=cluster)
 
+    def replace_certificates(self, cluster):
+        return self._call('replace_certificates', cluster=cluster)
+
     # Versioned Objects indirection API
 
     def object_class_action(self, context, objname, objmethod, objver,

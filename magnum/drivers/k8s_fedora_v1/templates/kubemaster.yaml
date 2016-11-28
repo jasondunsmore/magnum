@@ -179,6 +179,15 @@ parameters:
     type: string
     description: insecure registry url
 
+  replace_certs_param:
+    type: string
+    default: ''
+    description: >
+      Supplying a new value to this parameter during a stack update
+      will cause the software deployment resources that replace the
+      SSL certificates run.
+
+
 resources:
 
   master_wait_handle:
@@ -404,7 +413,8 @@ resources:
       image: {get_param: server_image}
       flavor: {get_param: master_flavor}
       key_name: {get_param: ssh_key_name}
-      user_data_format: RAW
+      user_data_format: SOFTWARE_CONFIG
+      software_config_transport: POLL_SERVER_HEAT
       user_data: {get_resource: kube_master_init}
       networks:
         - port: {get_resource: kube_master_eth0}
@@ -460,6 +470,49 @@ resources:
       instance_uuid: {get_resource: kube-master}
       volume_id: {get_resource: docker_volume}
       mountpoint: /dev/vdb
+
+  replace_certs:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config: {get_file: fragments/make-cert.sh}
+
+  replace_certs_deployment:
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      signal_transport: HEAT_SIGNAL
+      config: {get_resource: replace_certs}
+      server: {get_resource: kube-master}
+      actions: ['UPDATE']
+      input_values:
+        replace_certs_param: {get_param: replace_certs_param}
+
+  restart_apiserver:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config: |
+        #!/bin/sh
+
+        pkill -9 -f apiserver
+        sleep 1
+
+        # the kube-apiserver pod will respawn, wait for this to happen
+        # before exiting and letting cluster be marked UPDATE COMPLETE
+        while ! pgrep -f apiserver; do
+            sleep 1
+        done
+
+  restart_apiserver_deployment:
+    type: OS::Heat::SoftwareDeployment
+    depends_on: replace_certs_deployment
+    properties:
+      signal_transport: HEAT_SIGNAL
+      config: {get_resource: restart_apiserver}
+      server: {get_resource: kube-master}
+      actions: ['UPDATE']
+      input_values:
+        replace_certs_param: {get_param: replace_certs_param}
 
 outputs:
 

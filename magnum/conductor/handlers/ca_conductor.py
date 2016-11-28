@@ -12,10 +12,17 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import six
+import uuid
 
 from oslo_log import log as logging
+from pycadf import cadftaxonomy as taxonomy
 
+from magnum.common import clients
+from magnum.conductor.handlers import cluster_conductor
 from magnum.conductor.handlers.common import cert_manager
+from magnum.conductor import utils as conductor_utils
+from magnum.drivers.common import driver
 from magnum import objects
 LOG = logging.getLogger(__name__)
 
@@ -45,3 +52,19 @@ class Handler(object):
         certificate = objects.Certificate.from_object_cluster(cluster)
         certificate.pem = ca_cert.get_certificate()
         return certificate
+
+    def replace_certificates(self, context, cluster):
+        cert_manager.generate_certificates_to_cluster(cluster,
+                                                      context=context)
+        cluster.save()
+
+        conductor_utils.notify_about_cluster_operation(
+            context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING)
+
+        stack_update_fields = {
+            'existing': True,
+            'parameters': {'replace_certs_param': six.text_type(uuid.uuid4())}
+        }
+
+        osc = clients.OpenStackClients(context)
+        osc.heat().stacks.update(cluster.stack_id, **stack_update_fields)

@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
 from oslo_utils import timeutils
 import pecan
 import wsme
@@ -25,6 +26,8 @@ from magnum.api import utils as api_utils
 from magnum.common import exception
 from magnum.common import policy
 from magnum import objects
+
+LOG = logging.getLogger(__name__)
 
 
 class Certificate(base.APIBase):
@@ -166,3 +169,11 @@ class CertificateController(base.Controller):
         new_cert = pecan.request.rpcapi.sign_certificate(cluster,
                                                          cert_obj)
         return Certificate.convert_with_links(new_cert)
+
+    @expose.expose(Certificate, body=types.uuid_or_name, status_code=202)
+    def patch(self, cluster_ident):
+        context = pecan.request.context
+        cluster = api_utils.get_resource('Cluster', cluster_ident['cluster'])
+        policy.enforce(context, 'certificate:replace', cluster,
+                       action='certificate:replace')
+        pecan.request.rpcapi.replace_certificates(cluster)
