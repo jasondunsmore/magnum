@@ -118,3 +118,42 @@ Response Example
 
 .. literalinclude:: samples/certificates-ca-sign-resp.json
    :language: javascript
+
+Revoke the CA certificate for a bay/cluster
+===========================================
+
+.. rest_method:: PATCH /v1/certificates
+
+Revoke the CA certificate for a bay/cluster and invalidate all user
+certificates.
+
+Response Codes
+--------------
+
+.. rest_status_code:: success status.yaml
+
+   - 202
+
+.. rest_status_code:: error status.yaml
+
+   - 400
+
+Request
+-------
+
+.. rest_parameters:: parameters.yaml
+
+   - cluster: cluster_id
+
+Response
+--------
+
+.. rest_parameters:: parameters.yaml
+
+
+
+Response Example
+----------------
+
+.. literalinclude:: samples/revoke-ca-cert-resp.json
+   :language: javascript

@@ -174,3 +174,8 @@ class Driver(object):
     def delete_cluster(self, context, cluster):
         raise NotImplementedError("Subclasses must implement "
                                   "'delete_cluster'.")
+
+    def replace_certificates(self, context, cluster):
+        dr = self.get_driver_for_cluster(context, cluster)
+        raise exception.NotSupported("'replace_certificates' is not supported "
+                                     "by %s." % dr.__class__.__module__)

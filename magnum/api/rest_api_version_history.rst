@@ -44,3 +44,11 @@ user documentation.
   For example:-
   - http://XXX/v1/clusters/XXX/?rollback=True or
   - http://XXX/v1/bays/XXX/?rollback=True
+
+1.4
+---
+
+  Support for cluster CA certificate revocation
+
+  This gives admins a way to restrict/deny access to an existing
+  cluster once a user has been granted access.
