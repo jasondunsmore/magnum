@@ -1,0 +1,15 @@
+# Install packages needed for magnum
+git:
+docker-engine:
+docker-engine-selinux:
+kubelet:
+kubeadm:
+kubectl:
+kubernetes-cni:
+flannel:
+etcd:
+acpid:
+cloud-init:
+lvm2:
+firewalld:
+xfsprogs:
