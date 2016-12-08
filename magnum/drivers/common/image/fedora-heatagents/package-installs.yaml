@@ -1,0 +1,9 @@
+# Install packages needed for magnum
+git:
+docker-engine:
+docker-engine-selinux:
+flannel:
+etcd:
+cloud-init:
+lvm2:
+python-requests:
