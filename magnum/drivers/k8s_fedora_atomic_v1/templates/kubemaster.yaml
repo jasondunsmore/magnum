@@ -286,6 +286,12 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-master.sh}
 
+  kubelet_service:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: ../../common/templates/kubernetes/fragments/kubelet-service.sh}
+
   write_network_config:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -369,6 +375,7 @@ resources:
         - config: {get_resource: make_cert}
         - config: {get_resource: configure_docker_storage}
         - config: {get_resource: configure_kubernetes}
+        - config: {get_resource: kubelet_service}
         - config: {get_resource: add_proxy}
         - config: {get_resource: enable_services}
         - config: {get_resource: write_network_config}
