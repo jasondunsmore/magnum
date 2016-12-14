@@ -291,6 +291,12 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-minion.sh}
 
+  kubelet_service:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: ../../common/templates/kubernetes/fragments/kubelet-service.sh}
+
   kube_examples:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -357,6 +363,7 @@ resources:
         - config: {get_resource: configure_docker_storage}
         - config: {get_resource: configure_docker_registry}
         - config: {get_resource: configure_kubernetes_minion}
+        - config: {get_resource: kubelet_service}
         - config: {get_resource: network_service}
         - config: {get_resource: add_proxy}
         - config: {get_resource: enable_services}
