@@ -29,6 +29,50 @@ generate_pod_args() {
 init_templates () {
     . /etc/kubernetes/config
 
+    . /etc/kubernetes/apiserver
+
+    local TEMPLATE=/etc/kubernetes/manifests/kube-apiserver.yaml
+    [ -f ${TEMPLATE} ] || {
+        echo "TEMPLATE: $TEMPLATE"
+        mkdir -p $(dirname ${TEMPLATE})
+        cat << EOF > ${TEMPLATE}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-apiserver
+  namespace: kube-system
+spec:
+  hostNetwork: true
+  containers:
+  - name: kube-apiserver
+    image: ${HYPERKUBE_IMAGE}
+    command:
+    - /hyperkube
+    - apiserver
+$(generate_pod_args "    - " $KUBE_LOGTOSTDERR $KUBE_LOG_LEVEL $KUBE_ETCD_SERVERS $KUBE_API_ADDRESS $KUBE_API_PORT $KUBELET_PORT $KUBE_ALLOW_PRIV $KUBE_SERVICE_ADDRESSES $KUBE_ADMISSION_CONTROL $KUBE_API_ARGS)
+    volumeMounts:
+    - mountPath: /etc/ssl/certs
+      name: ssl-certs-host
+      readOnly: true
+    - mountPath: /srv/kubernetes
+      name: kubernetes-config
+      readOnly: true
+    - mountPath: /etc/sysconfig
+      name: sysconfig
+      readOnly: true
+  volumes:
+  - hostPath:
+      path: /etc/ssl/certs
+    name: ssl-certs-host
+  - hostPath:
+      path: /srv/kubernetes
+    name: kubernetes-config
+  - hostPath:
+      path: /etc/sysconfig
+    name: sysconfig
+EOF
+    }
+
     . /etc/kubernetes/controller-manager
 
     local TEMPLATE=/etc/kubernetes/manifests/kube-controller-manager.yaml
