@@ -9,7 +9,6 @@ if [ -z "$KUBE_NODE_IP" ]; then
     KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 fi
 
-CERT_DIR=/srv/kubernetes
 PROTOCOL=https
 FLANNEL_OPTIONS="-etcd-cafile $CERT_DIR/ca.crt \
 -etcd-certfile $CERT_DIR/client.crt \

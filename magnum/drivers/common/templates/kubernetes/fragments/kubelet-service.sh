@@ -10,6 +10,7 @@ fi
 
 KUBELET_SERVICE=/etc/systemd/system/kubelet.service
 
+mkdir /var/lib/kubelet
 cat >> $KUBELET_SERVICE <<'EOF'
 [Unit]
 Description=Kubernetes Kubelet Server
@@ -43,6 +44,7 @@ cat >> $KUBELET_SERVICE <<EOF
             $HYPERKUBE_IMAGE /hyperkube kubelet \\
 EOF
 cat >> $KUBELET_SERVICE <<'EOF'
+            --config=/etc/kubernetes/manifests \
             $KUBE_LOGTOSTDERR \
             $KUBE_LOG_LEVEL \
             $KUBELET_API_SERVER \

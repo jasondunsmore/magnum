@@ -8,7 +8,6 @@ if [ -z "$KUBE_NODE_IP" ]; then
 fi
 
 myip="${KUBE_NODE_IP}"
-cert_dir="/srv/kubernetes"
 protocol="https"
 
 if [ "$TLS_DISABLED" = "True" ]; then
@@ -29,12 +28,12 @@ EOF
 if [ "$TLS_DISABLED" = "False" ]; then
 
 cat >> /etc/etcd/etcd.conf <<EOF
-ETCD_CA_FILE=$cert_dir/ca.crt
-ETCD_CERT_FILE=$cert_dir/server.crt
-ETCD_KEY_FILE=$cert_dir/server.key
-ETCD_PEER_CA_FILE=$cert_dir/ca.crt
-ETCD_PEER_CERT_FILE=$cert_dir/server.crt
-ETCD_PEER_KEY_FILE=$cert_dir/server.key
+ETCD_CA_FILE=$CERT_DIR/ca.crt
+ETCD_CERT_FILE=$CERT_DIR/server.crt
+ETCD_KEY_FILE=$CERT_DIR/server.key
+ETCD_PEER_CA_FILE=$CERT_DIR/ca.crt
+ETCD_PEER_CERT_FILE=$CERT_DIR/server.crt
+ETCD_PEER_KEY_FILE=$CERT_DIR/server.key
 EOF
 
 fi

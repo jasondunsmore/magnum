@@ -24,16 +24,15 @@ if [ "$TLS_DISABLED" == "True" ]; then
     exit 0
 fi
 
-cert_dir=/srv/kubernetes
-cert_conf_dir=${cert_dir}/conf
+cert_conf_dir=${CERT_DIR}/conf
 
-mkdir -p "$cert_dir"
+mkdir -p "$CERT_DIR"
 mkdir -p "$cert_conf_dir"
 
-CA_CERT=$cert_dir/ca.crt
-CLIENT_CERT=$cert_dir/client.crt
-CLIENT_CSR=$cert_dir/client.csr
-CLIENT_KEY=$cert_dir/client.key
+CA_CERT=$CERT_DIR/ca.crt
+CLIENT_CERT=$CERT_DIR/client.crt
+CLIENT_CSR=$CERT_DIR/client.csr
+CLIENT_KEY=$CERT_DIR/client.key
 
 #Get a token by user credentials and trust
 auth_json=$(cat << EOF
@@ -111,10 +110,14 @@ curl -k -X POST \
 # Both etcd and kube user should have permission to access the certs and key.
 groupadd kube_etcd
 usermod -a -G kube_etcd etcd
-usermod -a -G kube_etcd kube
-chmod 550 "${cert_dir}"
-chown -R kube:kube_etcd "${cert_dir}"
-chmod 440 $CLIENT_KEY
+if getent passwd kube; then
+    usermod -a -G kube_etcd kube
+    chown -R kube:kube_etcd "${CERT_DIR}"
+else
+    chgrp -R kube_etcd "${CERT_DIR}"
+fi
+chmod 550 "${CERT_DIR}"
+chmod 440 $SERVER_KEY
 
 sed -i '
     s|CA_CERT|'"$CA_CERT"'|

@@ -260,7 +260,7 @@ resources:
         str_replace:
           template: {get_file: ../../common/templates/kubernetes/fragments/make-cert.sh}
           params:
-            "$CERT_DIR": "/srv/kubernetes"
+            "$CERT_DIR": "/etc/kubernetes/pki"
 
   configure_docker_storage:
     type: OS::Heat::SoftwareConfig
@@ -280,7 +280,7 @@ resources:
         str_replace:
           template: {get_file: ../../common/templates/kubernetes/fragments/configure-etcd.sh}
           params:
-            "$CERT_DIR": "/srv/kubernetes"
+            "$CERT_DIR": "/etc/kubernetes/pki"
 
   write_kube_os_config:
     type: OS::Heat::SoftwareConfig
@@ -288,11 +288,11 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh}
 
-  configure_kubernetes:
+  configure_kubernetes_master:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-master.sh}
+      config: {get_file: fragments/configure-kubernetes-master.sh}
 
   kubelet_service:
     type: OS::Heat::SoftwareConfig
@@ -314,7 +314,7 @@ resources:
         str_replace:
           template: {get_file: ../../common/templates/kubernetes/fragments/network-config-service.sh}
           params:
-            "$CERT_DIR": "/srv/kubernetes"
+            "$CERT_DIR": "/etc/kubernetes/pki"
 
   enable_services:
     type: OS::Heat::SoftwareConfig
@@ -324,7 +324,17 @@ resources:
         str_replace:
           template: {get_file: ../../common/templates/kubernetes/fragments/enable-services.sh}
           params:
-            "$SERVICES": "etcd docker kubelet"
+            "$SERVICES": "etcd docker"
+
+  enable_kubelet_service:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: ../../common/templates/kubernetes/fragments/enable-services.sh}
+          params:
+            "$SERVICES": "kubelet"
 
   kube_examples:
     type: OS::Heat::SoftwareConfig
@@ -390,18 +400,14 @@ resources:
         - config: {get_resource: write_kube_os_config}
         - config: {get_resource: make_cert}
         - config: {get_resource: configure_docker_storage}
-        - config: {get_resource: configure_kubernetes}
+        - config: {get_resource: configure_kubernetes_master}
         - config: {get_resource: kubelet_service}
         - config: {get_resource: add_proxy}
         - config: {get_resource: enable_services}
         - config: {get_resource: write_network_config}
         - config: {get_resource: network_config_service}
         - config: {get_resource: network_service}
-        - config: {get_resource: kube_system_namespace_service}
-        - config: {get_resource: enable_kube_controller_manager_scheduler}
-        - config: {get_resource: enable_kube_proxy}
-        - config: {get_resource: kube_ui_service}
-        - config: {get_resource: kube_examples}
+        - config: {get_resource: enable_kubelet_service}
         - config: {get_resource: master_wc_notify}
 
   ######################################################################
