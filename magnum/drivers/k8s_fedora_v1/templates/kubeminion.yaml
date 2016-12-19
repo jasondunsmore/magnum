@@ -277,7 +277,7 @@ resources:
         str_replace:
           params:
             $configure_docker_storage_driver: {get_file: ../../common/templates/fragments/configure_docker_storage_driver_atomic.sh}
-          template: {get_file: ../../common/templates/fragments/configure-docker-storage.sh}
+          template: {get_file: fragments/configure-docker-storage.sh}
 
   configure_docker_registry:
     type: OS::Heat::SoftwareConfig
@@ -291,6 +291,12 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-minion.sh}
 
+  kubelet_service:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/kubelet-service.sh}
+
   kube_examples:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -303,7 +309,7 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/network-service.sh}
 
-  enable_services:
+  enable_services_minion:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
@@ -351,16 +357,14 @@ resources:
       parts:
         - config: {get_resource: disable_selinux}
         - config: {get_resource: write_heat_params}
-        - config: {get_resource: write_kubeconfig}
         - config: {get_resource: make_cert}
-        - config: {get_resource: kube_examples}
         - config: {get_resource: configure_docker_storage}
         - config: {get_resource: configure_docker_registry}
         - config: {get_resource: configure_kubernetes_minion}
+        - config: {get_resource: kubelet_service}
         - config: {get_resource: network_service}
         - config: {get_resource: add_proxy}
-        - config: {get_resource: enable_services}
-        - config: {get_resource: enable_kube_proxy}
+        - config: {get_resource: enable_services_minion}
         - config: {get_resource: enable_docker_registry}
         - config: {get_resource: minion_wc_notify}
 

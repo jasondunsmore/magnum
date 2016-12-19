@@ -20,8 +20,8 @@ from magnum.drivers.heat import k8s_fedora_template_def as kftd
 CONF = magnum.conf.CONF
 
 
-class AtomicK8sTemplateDefinition(kftd.K8sFedoraTemplateDefinition):
-    """Kubernetes template for a Fedora Atomic VM."""
+class FedoraK8sTemplateDefinition(kftd.K8sFedoraTemplateDefinition):
+    """Kubernetes template for a Fedora VM."""
 
     @property
     def driver_module_path(self):

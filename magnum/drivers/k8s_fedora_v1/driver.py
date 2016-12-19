@@ -13,7 +13,7 @@
 # under the License.
 
 from magnum.drivers.heat import driver
-from magnum.drivers.k8s_fedora_atomic_v1 import template_def
+from magnum.drivers.k8s_fedora_v1 import template_def
 
 
 class Driver(driver.HeatDriver):
@@ -22,9 +22,9 @@ class Driver(driver.HeatDriver):
     def provides(self):
         return [
             {'server_type': 'vm',
-             'os': 'fedora-atomic',
+             'os': 'fedora',
              'coe': 'kubernetes'},
         ]
 
     def get_template_definition(self):
-        return template_def.AtomicK8sTemplateDefinition()
+        return template_def.FedoraK8sTemplateDefinition()

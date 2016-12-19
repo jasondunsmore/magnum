@@ -256,7 +256,7 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/make-cert.sh}
+      config: {get_file: fragments/make-cert.sh}
 
   configure_docker_storage:
     type: OS::Heat::SoftwareConfig
@@ -266,7 +266,7 @@ resources:
         str_replace:
           params:
             $configure_docker_storage_driver: {get_file: ../../common/templates/fragments/configure_docker_storage_driver_atomic.sh}
-          template: {get_file: ../../common/templates/fragments/configure-docker-storage.sh}
+          template: {get_file: fragments/configure-docker-storage.sh}
 
   configure_etcd:
     type: OS::Heat::SoftwareConfig
@@ -280,11 +280,17 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh}
 
-  configure_kubernetes:
+  configure_kubernetes_master:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-master.sh}
+      config: {get_file: fragments/configure-kubernetes-master.sh}
+
+  kubelet_service:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/kubelet-service.sh}
 
   write_network_config:
     type: OS::Heat::SoftwareConfig
@@ -298,11 +304,17 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/network-config-service.sh}
 
-  enable_services:
+  enable_services_master:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/enable-services-master.sh}
+      config: {get_file: fragments/enable-services-master.sh}
+
+  enable_kubernetes_services:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/enable-kubernetes-services.sh}
 
   kube_examples:
     type: OS::Heat::SoftwareConfig
@@ -368,17 +380,14 @@ resources:
         - config: {get_resource: write_kube_os_config}
         - config: {get_resource: make_cert}
         - config: {get_resource: configure_docker_storage}
-        - config: {get_resource: configure_kubernetes}
+        - config: {get_resource: configure_kubernetes_master}
+        - config: {get_resource: kubelet_service}
         - config: {get_resource: add_proxy}
-        - config: {get_resource: enable_services}
+        - config: {get_resource: enable_services_master}
         - config: {get_resource: write_network_config}
         - config: {get_resource: network_config_service}
         - config: {get_resource: network_service}
-        - config: {get_resource: kube_system_namespace_service}
-        - config: {get_resource: enable_kube_controller_manager_scheduler}
-        - config: {get_resource: enable_kube_proxy}
-        - config: {get_resource: kube_ui_service}
-        - config: {get_resource: kube_examples}
+        - config: {get_resource: enable_kubernetes_services}
         - config: {get_resource: master_wc_notify}
 
   ######################################################################
