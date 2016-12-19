@@ -22,7 +22,7 @@ class Driver(driver.HeatDriver):
     def provides(self):
         return [
             {'server_type': 'vm',
-             'os': 'fedora-atomic',
+             'os': 'fedora',
              'coe': 'kubernetes'},
         ]
 
