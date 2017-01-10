@@ -273,6 +273,14 @@ parameters:
     description: insecure registry url
     default: ""
 
+  replace_certs_param:
+    type: string
+    default: ''
+    description: >
+      Supplying a new value to this parameter during a stack update
+      will cause the software deployment resources that replace the
+      SSL certificates to run.
+
 resources:
 
   ######################################################################
@@ -434,6 +442,7 @@ resources:
           trust_id: {get_param: trust_id}
           auth_url: {get_param: auth_url}
           insecure_registry_url: {get_param: insecure_registry_url}
+          replace_certs_param: {get_param: replace_certs_param}
 
   ######################################################################
   #

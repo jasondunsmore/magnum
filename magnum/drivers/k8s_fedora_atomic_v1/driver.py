@@ -12,6 +12,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import six
+import uuid
+
+from pycadf import cadftaxonomy as taxonomy
+
+from magnum.common import clients
+from magnum.conductor.handlers.common import cert_manager
+from magnum.conductor import utils as conductor_utils
 from magnum.drivers.heat import driver
 from magnum.drivers.k8s_fedora_atomic_v1 import template_def
 
@@ -28,3 +36,19 @@ class Driver(driver.HeatDriver):
 
     def get_template_definition(self):
         return template_def.AtomicK8sTemplateDefinition()
+
+    def replace_certificates(self, context, cluster):
+        cert_manager.generate_certificates_to_cluster(cluster,
+                                                      context=context)
+        cluster.save()
+
+        conductor_utils.notify_about_cluster_operation(
+            context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING)
+
+        stack_update_fields = {
+            'existing': True,
+            'parameters': {'replace_certs_param': six.text_type(uuid.uuid4())}
+        }
+
+        osc = clients.OpenStackClients(context)
+        osc.heat().stacks.update(cluster.stack_id, **stack_update_fields)

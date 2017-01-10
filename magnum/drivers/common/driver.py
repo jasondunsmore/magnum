@@ -176,5 +176,4 @@ class Driver(object):
                                   "'delete_cluster'.")
 
     def replace_certificates(self, context, cluster):
-        raise NotImplementedError("Subclasses must implement "
-                                  "'replace_certificates'.")
+        raise NotImplementedError("'replace_certificates' is not supported by .")
