@@ -23,8 +23,7 @@ from magnum.tests.functional.common import config
 from magnum.tests.functional.common import datagen
 
 
-HEADERS = {'OpenStack-API-Version': 'container-infra latest',
-           'Accept': 'application/json',
+HEADERS = {'Accept': 'application/json',
            'Content-Type': 'application/json'}
 
 

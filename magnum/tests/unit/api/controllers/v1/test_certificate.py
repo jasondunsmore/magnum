@@ -20,9 +20,6 @@ from magnum.tests.unit.api import utils as api_utils
 from magnum.tests.unit.objects import utils as obj_utils
 
 
-HEADERS = {'OpenStack-API-Version': 'container-infra latest'}
-
-
 class TestCertObject(base.TestCase):
 
     @mock.patch('magnum.api.utils.get_resource')
@@ -57,8 +54,7 @@ class TestGetCaCertificate(api_base.FunctionalTest):
         mock_cert.as_dict.return_value = fake_cert
         self.conductor_api.get_ca_certificate.return_value = mock_cert
 
-        response = self.get_json('/certificates/%s' % self.cluster.uuid,
-                                 headers=HEADERS)
+        response = self.get_json('/certificates/%s' % self.cluster.uuid)
 
         self.assertEqual(self.cluster.uuid, response['cluster_uuid'])
         # check that bay is still valid as well
@@ -72,8 +68,7 @@ class TestGetCaCertificate(api_base.FunctionalTest):
         mock_cert.as_dict.return_value = fake_cert
         self.conductor_api.get_ca_certificate.return_value = mock_cert
 
-        response = self.get_json('/certificates/%s' % self.cluster.name,
-                                 headers=HEADERS)
+        response = self.get_json('/certificates/%s' % self.cluster.name)
 
         self.assertEqual(self.cluster.uuid, response['cluster_uuid'])
         # check that bay is still valid as well
@@ -83,7 +78,7 @@ class TestGetCaCertificate(api_base.FunctionalTest):
 
     def test_get_one_by_name_not_found(self):
         response = self.get_json('/certificates/not_found',
-                                 expect_errors=True, headers=HEADERS)
+                                 expect_errors=True)
 
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
@@ -96,7 +91,7 @@ class TestGetCaCertificate(api_base.FunctionalTest):
                                       uuid=uuidutils.generate_uuid())
 
         response = self.get_json('/certificates/test_cluster',
-                                 expect_errors=True, headers=HEADERS)
+                                 expect_errors=True)
 
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
@@ -108,8 +103,7 @@ class TestGetCaCertificate(api_base.FunctionalTest):
         mock_cert.as_dict.return_value = fake_cert
         self.conductor_api.get_ca_certificate.return_value = mock_cert
 
-        response = self.get_json('/certificates/%s' % self.cluster.uuid,
-                                 headers=HEADERS)
+        response = self.get_json('/certificates/%s' % self.cluster.uuid)
 
         self.assertIn('links', response.keys())
         self.assertEqual(2, len(response['links']))
@@ -142,7 +136,7 @@ class TestPost(api_base.FunctionalTest):
         new_cert = api_utils.cert_post_data(cluster_uuid=self.cluster.uuid)
         del new_cert['pem']
 
-        response = self.post_json('/certificates', new_cert, headers=HEADERS)
+        response = self.post_json('/certificates', new_cert)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
         self.assertEqual(new_cert['cluster_uuid'],
@@ -158,7 +152,7 @@ class TestPost(api_base.FunctionalTest):
         new_cert['bay_uuid'] = new_cert['cluster_uuid']
         del new_cert['cluster_uuid']
 
-        response = self.post_json('/certificates', new_cert, headers=HEADERS)
+        response = self.post_json('/certificates', new_cert)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
         self.assertEqual(self.cluster.uuid, response.json['cluster_uuid'])
@@ -170,7 +164,7 @@ class TestPost(api_base.FunctionalTest):
         new_cert = api_utils.cert_post_data(cluster_uuid=self.cluster.name)
         del new_cert['pem']
 
-        response = self.post_json('/certificates', new_cert, headers=HEADERS)
+        response = self.post_json('/certificates', new_cert)
 
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
@@ -182,7 +176,7 @@ class TestPost(api_base.FunctionalTest):
         del new_cert['pem']
 
         response = self.post_json('/certificates', new_cert,
-                                  expect_errors=True, headers=HEADERS)
+                                  expect_errors=True)
 
         self.assertEqual(400, response.status_int)
         self.assertEqual('application/json', response.content_type)
@@ -208,7 +202,7 @@ class TestRotateCaCertificate(api_base.FunctionalTest):
         self.conductor_api.rotate_ca_certificate.return_value = mock_cert
 
         response = self.patch_json('/certificates/%s' % self.cluster.uuid,
-                                   params={}, headers=HEADERS)
+                                   params={})
 
         self.assertEqual(202, response.status_code)
 
@@ -234,7 +228,7 @@ class TestRotateCaCertificateNonTls(api_base.FunctionalTest):
         self.conductor_api.rotate_ca_certificate.return_value = mock_cert
 
         response = self.patch_json('/certificates/%s' % self.cluster.uuid,
-                                   params={}, headers=HEADERS,
+                                   params={},
                                    expect_errors=True)
         self.assertEqual(400, response.status_code)
         self.assertIn("Rotating the CA certificate on a non-TLS cluster",
@@ -257,18 +251,17 @@ class TestCertPolicyEnforcement(api_base.FunctionalTest):
         self._common_policy_check(
             "certificate:get", self.get_json,
             '/certificates/%s' % cluster.uuid,
-            expect_errors=True, headers=HEADERS)
+            expect_errors=True)
 
     def test_policy_disallow_create(self):
         cluster = obj_utils.create_test_cluster(self.context)
         cert = api_utils.cert_post_data(cluster_uuid=cluster.uuid)
         self._common_policy_check(
             "certificate:create", self.post_json, '/certificates', cert,
-            expect_errors=True, headers=HEADERS)
+            expect_errors=True)
 
     def test_policy_disallow_rotate(self):
         cluster = obj_utils.create_test_cluster(self.context)
         self._common_policy_check(
             "certificate:rotate_ca", self.patch_json,
-            '/certificates/%s' % cluster.uuid, params={}, expect_errors=True,
-            headers=HEADERS)
+            '/certificates/%s' % cluster.uuid, params={}, expect_errors=True)
