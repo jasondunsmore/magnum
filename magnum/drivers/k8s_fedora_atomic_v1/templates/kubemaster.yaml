@@ -368,11 +368,11 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/wc-notify-master.sh}
 
-  disable_selinux:
+  enable_selinux:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/disable-selinux.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/enable-selinux.sh}
 
   add_proxy:
     type: OS::Heat::SoftwareConfig
@@ -384,7 +384,6 @@ resources:
     type: OS::Heat::MultipartMime
     properties:
       parts:
-        - config: {get_resource: disable_selinux}
         - config: {get_resource: write_heat_params}
         - config: {get_resource: configure_etcd}
         - config: {get_resource: write_kube_os_config}
@@ -402,6 +401,7 @@ resources:
         - config: {get_resource: kube_ui_service}
         - config: {get_resource: kube_examples}
         - config: {get_resource: master_wc_notify}
+        - config: {get_resource: enable_selinux}
 
   ######################################################################
   #
